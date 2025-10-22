@@ -5,6 +5,8 @@ Una aplicación iOS nativa y vibrante para identificar razas de perros y gatos u
 ## ✨ Características
 
 - **Identificación en Tiempo Real**: Usa la cámara para identificar razas de perros y gatos instantáneamente
+- **Selector de Fotos**: Elige imágenes de tu galería para clasificar sin necesidad de cámara
+- **Funciona en Simulador**: Prueba la app en el simulador usando fotos de tu biblioteca
 - **Interfaz Liquid Glass**: Diseño moderno con el estilo liquid glass de iOS 26
 - **Vision Framework**: Utiliza los modelos de Machine Learning nativos de Apple para clasificación de imágenes
 - **Responsive Design**: Optimizado para iPhone y iPad (incluyendo iPad de 13 pulgadas)
@@ -17,6 +19,7 @@ Una aplicación iOS nativa y vibrante para identificar razas de perros y gatos u
 - **Vision Framework**: Para procesamiento de imágenes y clasificación con ML
 - **Core ML**: Modelos de Machine Learning optimizados para iOS
 - **AVFoundation**: Para captura de cámara de alta calidad
+- **PhotosUI**: Para selección de fotos de la biblioteca
 - **Concurrency**: Uso de async/await y GCD para operaciones concurrentes
 
 ## 📱 Requisitos
@@ -24,7 +27,7 @@ Una aplicación iOS nativa y vibrante para identificar razas de perros y gatos u
 - iOS 17.0+
 - Xcode 15.0+
 - Swift 5.9+
-- Dispositivo con cámara
+- Dispositivo con cámara (opcional - también funciona con selector de fotos en simulador)
 
 ## 🚀 Instalación
 
@@ -42,6 +45,17 @@ open Mascotas.xcodeproj
 3. Selecciona tu dispositivo o simulador
 
 4. Presiona Cmd + R para compilar y ejecutar
+
+### Uso en Simulador
+
+El simulador no tiene acceso a la cámara física, pero puedes usar la app completa con el selector de fotos:
+
+1. Ejecuta la app en el simulador
+2. Toca el botón morado de galería (ícono de foto)
+3. Selecciona una foto de perro o gato de tu biblioteca
+4. La app clasificará la raza automáticamente
+
+Para agregar fotos al simulador, arrastra imágenes a la ventana del simulador o usa Safari en el simulador para descargar fotos.
 
 ## 🎨 Diseño
 
@@ -70,6 +84,7 @@ Mascotas/
 ├── ContentView.swift           # Vista principal con interfaz liquid glass
 ├── CameraManager.swift         # Manager para captura de cámara
 ├── CameraView.swift           # Vista de preview de cámara
+├── ImagePicker.swift          # Selector de fotos de la biblioteca
 ├── PetClassifier.swift        # Clasificador usando Vision Framework
 ├── Assets.xcassets/           # Recursos e íconos
 └── Info.plist                 # Configuración y permisos
@@ -77,7 +92,11 @@ Mascotas/
 
 ## 🔐 Permisos
 
-La aplicación requiere acceso a la cámara. El permiso se solicita automáticamente la primera vez que se ejecuta la app.
+La aplicación solicita dos permisos opcionales:
+- **Cámara**: Para tomar fotos en tiempo real y clasificarlas
+- **Biblioteca de Fotos**: Para seleccionar imágenes existentes y clasificarlas
+
+Los permisos se solicitan automáticamente cuando intentas usar cada función.
 
 ## 📄 Licencia
 

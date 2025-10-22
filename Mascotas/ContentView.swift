@@ -21,20 +21,23 @@ struct ContentView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Gradiente de fondo animado
+                // Gradiente de fondo animado (siempre visible)
                 AnimatedGradientBackground()
                     .ignoresSafeArea()
 
-                if showCamera && cameraManager.isAuthorized, let session = cameraManager.session {
-                    // Vista de cámara
-                    CameraView(session: session)
-                        .ignoresSafeArea()
-                        .onAppear {
-                            cameraManager.startSession()
-                        }
-                        .onDisappear {
-                            cameraManager.stopSession()
-                        }
+                // Vista de cámara cuando esté lista y no haya resultados
+                if !showResult {
+                    if showCamera && cameraManager.isAuthorized, let session = cameraManager.session {
+                        CameraView(session: session)
+                            .ignoresSafeArea()
+                            .onAppear {
+                                cameraManager.startSession()
+                            }
+                    } else {
+                        // Placeholder mientras se carga la cámara o si no hay permisos
+                        Color.black.opacity(0.3)
+                            .ignoresSafeArea()
+                    }
                 }
 
                 // Overlay de interfaz
@@ -75,6 +78,12 @@ struct ContentView: View {
                             analyzeSelectedImage(image)
                         }
                     }
+            }
+            .onAppear {
+                // Inicializar cámara al aparecer
+                if !cameraManager.isAuthorized {
+                    cameraManager.checkAuthorization()
+                }
             }
         }
     }
@@ -411,6 +420,11 @@ struct ContentView: View {
             animateCalories = false
             foodClassifier.reset()
             showCamera = true
+        }
+
+        // Reiniciar sesión de cámara
+        if cameraManager.isAuthorized {
+            cameraManager.startSession()
         }
     }
 }

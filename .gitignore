@@ -95,6 +95,7 @@ __pycache__/
 *$py.class
 .Python
 generate_icon.py
+generate_calories_icon.py
 
 # macOS
 .DS_Store

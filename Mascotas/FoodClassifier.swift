@@ -1,6 +1,6 @@
 //
 //  FoodClassifier.swift
-//  Mascotas
+//  CaloriesAI
 //
 //  Created by Claude on 22/10/2025.
 //
@@ -86,18 +86,79 @@ class FoodClassifier {
         // Analizar top resultados
         let topResults = Array(results.prefix(maxResultsToAnalyze))
 
+        // Debug: Imprimir top 10 resultados para ver qué detecta Vision
+        print("🔍 Vision detectó:")
+        for (index, result) in topResults.prefix(10).enumerated() {
+            print("  \(index + 1). \(result.identifier) - \(Int(result.confidence * 100))%")
+        }
+
         // Usar programación funcional para filtrar y mapear alimentos
         let foodObservations = topResults.filter { observation in
             FoodCaloriesDatabase.isFood(observation.identifier)
         }
 
+        print("🍽️ Alimentos detectados: \(foodObservations.count)")
+
         // Si no encontramos alimentos, retornar resultado negativo
         guard !foodObservations.isEmpty else {
+            // Intentar detectar alimentos de forma más agresiva
+            // Buscar en TODOS los resultados si alguno tiene palabras relacionadas con comida
+            let possibleFoods = topResults.filter { observation in
+                let id = observation.identifier.lowercased()
+                return id.contains("food") || id.contains("dish") ||
+                       id.contains("plate") || id.contains("meal") ||
+                       id.contains("snack") || id.contains("dessert") ||
+                       observation.confidence > 0.5
+            }
+
+            if possibleFoods.isEmpty {
+                return FoodAnalysisResult(
+                    items: [],
+                    totalCalories: 0,
+                    isFood: false,
+                    message: "⚠️ No se detectaron alimentos en la imagen"
+                )
+            }
+
+            // Usar los posibles alimentos
+            for observation in possibleFoods {
+                let identifier = observation.identifier.lowercased()
+                let formattedName = FoodCaloriesDatabase.formatFoodName(identifier)
+
+                // Estimar calorías basadas en la categoría genérica
+                let estimatedCalories = estimateCalories(for: identifier, confidence: observation.confidence)
+
+                let foodItem = FoodItem(
+                    name: formattedName,
+                    calories: estimatedCalories,
+                    confidence: Double(observation.confidence),
+                    portionSize: "porción"
+                )
+
+                detectedFoods.append(foodItem)
+                totalCalories += estimatedCalories
+
+                if detectedFoods.count >= 5 {
+                    break
+                }
+            }
+
+            if detectedFoods.isEmpty {
+                return FoodAnalysisResult(
+                    items: [],
+                    totalCalories: 0,
+                    isFood: false,
+                    message: "⚠️ No se detectaron alimentos en la imagen"
+                )
+            }
+
+            detectedFoods.sort { $0.confidence > $1.confidence }
+
             return FoodAnalysisResult(
-                items: [],
-                totalCalories: 0,
-                isFood: false,
-                message: "⚠️ No se detectaron alimentos en la imagen"
+                items: detectedFoods,
+                totalCalories: totalCalories,
+                isFood: true,
+                message: nil
             )
         }
 

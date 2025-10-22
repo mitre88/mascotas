@@ -1,6 +1,6 @@
 //
 //  CameraManager.swift
-//  Mascotas
+//  CaloriesAI
 //
 //  Created by Claude on 22/10/2025.
 //
@@ -17,7 +17,7 @@ class CameraManager: NSObject {
     var output: AVCapturePhotoOutput?
     var previewLayer: AVCaptureVideoPreviewLayer?
 
-    private let sessionQueue = DispatchQueue(label: "com.mascotas.camera")
+    private let sessionQueue = DispatchQueue(label: "com.caloriesai.camera")
 
     override init() {
         super.init()

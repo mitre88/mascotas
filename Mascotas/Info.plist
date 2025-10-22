@@ -38,9 +38,9 @@
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
     <key>NSCameraUsageDescription</key>
-    <string>Necesitamos acceso a la cámara para identificar razas de perros y gatos</string>
+    <string>Necesitamos acceso a la cámara para analizar alimentos y calcular calorías</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Necesitamos acceso a tu galería de fotos para identificar razas de perros y gatos</string>
+    <string>Necesitamos acceso a tu galería de fotos para analizar alimentos y calcular calorías</string>
     <key>UILaunchScreen</key>
     <dict>
         <key>UIColorName</key>

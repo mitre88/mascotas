@@ -1,33 +1,34 @@
-# 🐾 Mascotas
+# CaloriesAI
 
-Una aplicación iOS nativa y vibrante para identificar razas de perros y gatos usando la cámara y los frameworks de Apple.
+Una aplicación iOS nativa y moderna para analizar alimentos en fotos y calcular calorías usando inteligencia artificial y los frameworks de Apple.
 
 ## ✨ Características
 
-- **Identificación en Tiempo Real**: Usa la cámara para identificar razas de perros y gatos instantáneamente
-- **Selector de Fotos**: Elige imágenes de tu galería para clasificar sin necesidad de cámara
-- **Funciona en Simulador**: Prueba la app en el simulador usando fotos de tu biblioteca
+- **Análisis de Alimentos**: Identifica automáticamente alimentos en fotos usando Vision Framework
+- **Cálculo de Calorías**: Muestra calorías totales y desglose detallado por alimento
+- **Cámara en Tiempo Real**: Toma fotos directamente con la cámara para análisis instantáneo
+- **Selector de Galería**: Analiza fotos existentes de tu biblioteca sin usar la cámara
+- **Detección Inteligente**: Notifica cuando la imagen no contiene alimentos
 - **Interfaz Liquid Glass**: Diseño moderno con el estilo liquid glass de iOS 26
-- **Vision Framework**: Utiliza los modelos de Machine Learning nativos de Apple para clasificación de imágenes
-- **Responsive Design**: Optimizado para iPhone y iPad (incluyendo iPad de 13 pulgadas)
-- **Experiencia Fluida**: Animaciones suaves y transiciones naturales
-- **Colores Vibrantes**: Gradientes animados y una paleta de colores dinámica
+- **Base de Datos Extensa**: Incluye datos de calorías para más de 80 alimentos
+- **Responsive Design**: Optimizado para iPhone y iPad
+- **Animaciones Fluidas**: Transiciones suaves con spring physics
 
 ## 🛠 Tecnologías
 
-- **SwiftUI**: Framework nativo de Apple para interfaces de usuario declarativas
-- **Vision Framework**: Para procesamiento de imágenes y clasificación con ML
-- **Core ML**: Modelos de Machine Learning optimizados para iOS
+- **SwiftUI**: Framework nativo de Apple para interfaces declarativas
+- **Vision Framework**: Para clasificación de imágenes con Machine Learning nativo
 - **AVFoundation**: Para captura de cámara de alta calidad
 - **PhotosUI**: Para selección de fotos de la biblioteca
-- **Concurrency**: Uso de async/await y GCD para operaciones concurrentes
+- **Concurrency**: Procesamiento asíncrono con DispatchQueue para máximo rendimiento
+- **Programación Funcional**: Uso de filter, map, reduce para código eficiente
 
 ## 📱 Requisitos
 
 - iOS 17.0+
 - Xcode 15.0+
 - Swift 5.9+
-- Dispositivo con cámara (opcional - también funciona con selector de fotos en simulador)
+- Cámara (opcional - también funciona con selector de fotos en simulador)
 
 ## 🚀 Instalación
 
@@ -48,55 +49,79 @@ open Mascotas.xcodeproj
 
 ### Uso en Simulador
 
-El simulador no tiene acceso a la cámara física, pero puedes usar la app completa con el selector de fotos:
+El simulador no tiene cámara física, pero puedes usar la app completa con el selector de fotos:
 
 1. Ejecuta la app en el simulador
-2. Toca el botón morado de galería (ícono de foto)
-3. Selecciona una foto de perro o gato de tu biblioteca
-4. La app clasificará la raza automáticamente
+2. Toca el botón morado de galería
+3. Selecciona una foto de alimentos de tu biblioteca
+4. La app analizará los alimentos y mostrará las calorías
 
-Para agregar fotos al simulador, arrastra imágenes a la ventana del simulador o usa Safari en el simulador para descargar fotos.
+Para agregar fotos al simulador, arrastra imágenes a la ventana del simulador o usa Safari para descargar fotos de alimentos.
 
 ## 🎨 Diseño
 
-La aplicación utiliza el paradigma de diseño liquid glass de iOS 26, que incluye:
+La aplicación utiliza el paradigma liquid glass de iOS 26:
 
-- Efectos de desenfoque y transparencia (`.ultraThinMaterial`)
-- Gradientes suaves y animados
-- Bordes con gradientes y brillos
+- Efectos de desenfoque con `.ultraThinMaterial`
+- Gradientes naranja/rojo vibrantes (tema de energía/calorías)
+- Bordes con brillos y gradientes
 - Sombras sutiles para profundidad
-- Animaciones con spring physics para interacciones naturales
+- Animaciones secuenciales (stagger effect) para resultados
+- Spring physics para interacciones naturales
 
 ## 🏗 Arquitectura
 
-El proyecto sigue principios de programación funcional y utiliza:
+El proyecto utiliza programación funcional y concurrencia:
 
-- **@Observable**: Para state management reactivo
-- **Concurrency**: Operaciones asíncronas con DispatchQueue y async/await
-- **Separation of Concerns**: Lógica separada en managers dedicados
-- **SwiftUI Best Practices**: Componentes reutilizables y composables
+- **@Observable**: State management reactivo en SwiftUI
+- **Concurrency**: Procesamiento en background con DispatchQueue
+- **Functional Programming**: Filter, map, reduce para transformación de datos
+- **Separation of Concerns**: Lógica separada en módulos dedicados
 
 ### Estructura del Proyecto
 
 ```
 Mascotas/
-├── MascotasApp.swift          # Punto de entrada de la app
-├── ContentView.swift           # Vista principal con interfaz liquid glass
-├── CameraManager.swift         # Manager para captura de cámara
-├── CameraView.swift           # Vista de preview de cámara
-├── ImagePicker.swift          # Selector de fotos de la biblioteca
-├── PetClassifier.swift        # Clasificador usando Vision Framework
-├── Assets.xcassets/           # Recursos e íconos
-└── Info.plist                 # Configuración y permisos
+├── CaloriesAIApp.swift           # Punto de entrada de la app
+├── ContentView.swift              # Vista principal con interfaz liquid glass
+├── FoodClassifier.swift           # Clasificador de alimentos con Vision
+├── FoodCaloriesDatabase.swift     # Base de datos de calorías (80+ alimentos)
+├── FoodItem.swift                 # Modelo de datos para alimentos detectados
+├── CameraManager.swift            # Manager para captura de cámara
+├── CameraView.swift              # Vista de preview de cámara
+├── ImagePicker.swift             # Selector de fotos de la biblioteca
+├── Assets.xcassets/              # Recursos e ícono con llama
+└── Info.plist                    # Configuración y permisos
 ```
 
 ## 🔐 Permisos
 
-La aplicación solicita dos permisos opcionales:
-- **Cámara**: Para tomar fotos en tiempo real y clasificarlas
-- **Biblioteca de Fotos**: Para seleccionar imágenes existentes y clasificarlas
+La aplicación solicita dos permisos:
+- **Cámara**: Para tomar fotos de alimentos y analizarlas
+- **Biblioteca de Fotos**: Para seleccionar fotos existentes de alimentos
 
-Los permisos se solicitan automáticamente cuando intentas usar cada función.
+Los permisos se solicitan automáticamente al usar cada función.
+
+## 🍽️ Alimentos Soportados
+
+La base de datos incluye información calórica para más de 80 alimentos:
+
+- Frutas y verduras
+- Carnes, pollo, pescado
+- Pastas y granos
+- Lácteos
+- Postres y dulces
+- Bebidas
+- Y muchos más...
+
+Para alimentos no reconocidos, la app proporciona estimaciones basadas en categorías similares.
+
+## ⚡ Performance
+
+- **Procesamiento Concurrente**: Análisis en background thread para UI fluida
+- **Filtrado Inteligente**: Analiza top 15 resultados para balance entre precisión y velocidad
+- **Límite de Resultados**: Máximo 8 alimentos mostrados para mejor UX
+- **Prevención de Duplicados**: Sistema inteligente para evitar alimentos repetidos
 
 ## 📄 Licencia
 
@@ -104,8 +129,8 @@ Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 
 ## 👨‍💻 Autor
 
-Creado con ❤️ usando Swift y SwiftUI
+Creado con SwiftUI y Vision Framework de Apple
 
 ---
 
-**Nota**: Esta aplicación usa el modelo MobileNetV2 incluido en Core ML para clasificación de imágenes. Para mejores resultados con mascotas específicas, considera entrenar un modelo personalizado con Core ML Tools.
+**Nota**: Esta aplicación usa VNClassifyImageRequest nativo de Apple para clasificación de imágenes. La precisión de detección depende del modelo de Machine Learning integrado en iOS.

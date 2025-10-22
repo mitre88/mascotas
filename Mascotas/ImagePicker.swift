@@ -1,6 +1,6 @@
 //
 //  ImagePicker.swift
-//  Mascotas
+//  CaloriesAI
 //
 //  Created by Claude on 22/10/2025.
 //

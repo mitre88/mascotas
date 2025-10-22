@@ -4,6 +4,8 @@
 <dict>
     <key>NSCameraUsageDescription</key>
     <string>Necesitamos acceso a la cámara para identificar razas de perros y gatos</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Necesitamos acceso a tu galería de fotos para identificar razas de perros y gatos</string>
     <key>UILaunchScreen</key>
     <dict>
         <key>UIColorName</key>

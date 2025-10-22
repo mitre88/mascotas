@@ -14,6 +14,8 @@ struct ContentView: View {
     @State private var showResult = false
     @State private var capturedImage: UIImage?
     @State private var isFlashing = false
+    @State private var showImagePicker = false
+    @State private var showCamera = true
 
     var body: some View {
         GeometryReader { geometry in
@@ -22,7 +24,7 @@ struct ContentView: View {
                 AnimatedGradientBackground()
                     .ignoresSafeArea()
 
-                if cameraManager.isAuthorized, let session = cameraManager.session {
+                if showCamera && cameraManager.isAuthorized, let session = cameraManager.session {
                     // Vista de cámara
                     CameraView(session: session)
                         .ignoresSafeArea()
@@ -32,40 +34,45 @@ struct ContentView: View {
                         .onDisappear {
                             cameraManager.stopSession()
                         }
-
-                    // Overlay de interfaz con liquid glass
-                    VStack {
-                        // Header con efecto liquid glass
-                        headerView
-                            .padding(.top, geometry.safeAreaInsets.top)
-
-                        Spacer()
-
-                        // Resultados con liquid glass
-                        if showResult {
-                            resultView
-                                .transition(.scale.combined(with: .opacity))
-                        }
-
-                        Spacer()
-
-                        // Botones de control
-                        controlButtons
-                            .padding(.bottom, geometry.safeAreaInsets.bottom + 20)
-                    }
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: showResult)
-
-                    // Efecto de flash
-                    if isFlashing {
-                        Color.white
-                            .ignoresSafeArea()
-                            .opacity(0.8)
-                            .transition(.opacity)
-                    }
-                } else {
-                    // Vista de permisos
-                    permissionView
                 }
+
+                // Overlay de interfaz con liquid glass
+                VStack {
+                    // Header con efecto liquid glass
+                    headerView
+                        .padding(.top, geometry.safeAreaInsets.top)
+
+                    Spacer()
+
+                    // Resultados con liquid glass
+                    if showResult {
+                        resultView
+                            .transition(.scale.combined(with: .opacity))
+                    }
+
+                    Spacer()
+
+                    // Botones de control
+                    controlButtons
+                        .padding(.bottom, geometry.safeAreaInsets.bottom + 20)
+                }
+                .animation(.spring(response: 0.6, dampingFraction: 0.8), value: showResult)
+
+                // Efecto de flash
+                if isFlashing {
+                    Color.white
+                        .ignoresSafeArea()
+                        .opacity(0.8)
+                        .transition(.opacity)
+                }
+            }
+            .sheet(isPresented: $showImagePicker) {
+                ImagePicker(selectedImage: $capturedImage)
+                    .onDisappear {
+                        if let image = capturedImage {
+                            classifySelectedImage(image)
+                        }
+                    }
             }
         }
     }
@@ -173,6 +180,7 @@ struct ContentView: View {
                         showResult = false
                         capturedImage = nil
                         classifier.reset()
+                        showCamera = true
                     }
                 } label: {
                     Image(systemName: "arrow.clockwise")
@@ -183,30 +191,56 @@ struct ContentView: View {
                             LiquidGlassButton(color: .blue)
                         }
                 }
-            }
-
-            // Botón de captura
-            Button {
-                captureAndClassify()
-            } label: {
-                ZStack {
-                    Circle()
-                        .fill(.white)
-                        .frame(width: 70, height: 70)
-                        .overlay {
-                            Circle()
-                                .strokeBorder(.white.opacity(0.3), lineWidth: 4)
-                                .frame(width: 82, height: 82)
+            } else {
+                // Botón de galería
+                Button {
+                    showCamera = false
+                    showImagePicker = true
+                } label: {
+                    Image(systemName: "photo.on.rectangle")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 64, height: 64)
+                        .background {
+                            LiquidGlassButton(color: .purple)
                         }
-
-                    if classifier.isProcessing {
-                        ProgressView()
-                            .tint(.black)
-                    }
                 }
-                .shadow(color: .white.opacity(0.3), radius: 20, y: 5)
+                .disabled(classifier.isProcessing)
             }
-            .disabled(classifier.isProcessing)
+
+            // Botón de captura/cámara
+            if !showResult {
+                Button {
+                    if cameraManager.isAuthorized {
+                        showCamera = true
+                        captureAndClassify()
+                    } else {
+                        cameraManager.checkAuthorization()
+                    }
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(.white)
+                            .frame(width: 70, height: 70)
+                            .overlay {
+                                Circle()
+                                    .strokeBorder(.white.opacity(0.3), lineWidth: 4)
+                                    .frame(width: 82, height: 82)
+                            }
+
+                        if classifier.isProcessing {
+                            ProgressView()
+                                .tint(.black)
+                        } else {
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 28, weight: .semibold))
+                                .foregroundColor(.black)
+                        }
+                    }
+                    .shadow(color: .white.opacity(0.3), radius: 20, y: 5)
+                }
+                .disabled(classifier.isProcessing)
+            }
         }
         .padding(.horizontal, 40)
     }
@@ -277,6 +311,15 @@ struct ContentView: View {
             // Clasificar
             classifier.classifyImage(image)
         }
+    }
+
+    private func classifySelectedImage(_ image: UIImage) {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+            showResult = true
+        }
+
+        // Clasificar imagen seleccionada de la galería
+        classifier.classifyImage(image)
     }
 }
 

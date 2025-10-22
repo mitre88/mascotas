@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Vision
-import CoreML
 import UIKit
 
 @Observable
@@ -37,16 +36,9 @@ class PetClassifier {
                 return
             }
 
-            // Usar el modelo de clasificación de imágenes de Apple
-            guard let model = try? VNCoreMLModel(for: MobileNetV2().model) else {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Error al cargar el modelo"
-                    self.isProcessing = false
-                }
-                return
-            }
-
-            let request = VNCoreMLRequest(model: model) { [weak self] request, error in
+            // Usar el clasificador de imágenes nativo de Apple (VNClassifyImageRequest)
+            // Este clasificador usa modelos pre-entrenados incluidos en iOS
+            let request = VNClassifyImageRequest { [weak self] request, error in
                 guard let self = self else { return }
 
                 if let error = error {

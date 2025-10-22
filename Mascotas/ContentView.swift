@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  Mascotas
+//  Mascotas (CaloriesAI)
 //
 //  Created by Claude on 22/10/2025.
 //
@@ -10,12 +10,13 @@ import AVFoundation
 
 struct ContentView: View {
     @State private var cameraManager = CameraManager()
-    @State private var classifier = PetClassifier()
+    @State private var foodClassifier = FoodClassifier()
     @State private var showResult = false
     @State private var capturedImage: UIImage?
     @State private var isFlashing = false
     @State private var showImagePicker = false
     @State private var showCamera = true
+    @State private var animateCalories = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -36,18 +37,19 @@ struct ContentView: View {
                         }
                 }
 
-                // Overlay de interfaz con liquid glass
+                // Overlay de interfaz
                 VStack {
-                    // Header con efecto liquid glass
+                    // Header
                     headerView
                         .padding(.top, geometry.safeAreaInsets.top)
 
                     Spacer()
 
-                    // Resultados con liquid glass
+                    // Resultados de análisis
                     if showResult {
                         resultView
                             .transition(.scale.combined(with: .opacity))
+                            .padding(.horizontal, 20)
                     }
 
                     Spacer()
@@ -70,7 +72,7 @@ struct ContentView: View {
                 ImagePicker(selectedImage: $capturedImage)
                     .onDisappear {
                         if let image = capturedImage {
-                            classifySelectedImage(image)
+                            analyzeSelectedImage(image)
                         }
                     }
             }
@@ -81,17 +83,17 @@ struct ContentView: View {
     private var headerView: some View {
         VStack(spacing: 8) {
             HStack {
-                Image(systemName: "pawprint.fill")
+                Image(systemName: "chart.bar.doc.horizontal.fill")
                     .font(.title2)
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [.pink, .purple, .blue],
+                            colors: [.orange, .red, .pink],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
 
-                Text("Mascotas")
+                Text("CaloriesAI")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
@@ -114,74 +116,191 @@ struct ContentView: View {
 
     // MARK: - Result View
     private var resultView: some View {
-        VStack(spacing: 16) {
-            // Imagen capturada
-            if let image = capturedImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 120, height: 120)
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .strokeBorder(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.5), .clear],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 2
-                            )
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 16) {
+                // Imagen capturada
+                if let image = capturedImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 200)
+                        .frame(maxWidth: .infinity)
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .strokeBorder(
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.5), .clear],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 2
+                                )
+                        }
+                        .shadow(color: .black.opacity(0.3), radius: 15, y: 8)
+                }
+
+                if foodClassifier.isProcessing {
+                    processingView
+                } else if let result = foodClassifier.analysisResult {
+                    if result.isFood {
+                        foodResultView(result: result)
+                    } else {
+                        notFoodView(message: result.message ?? "No se detectaron alimentos")
                     }
-                    .shadow(color: .black.opacity(0.3), radius: 20, y: 10)
-            }
-
-            VStack(spacing: 8) {
-                if classifier.isProcessing {
-                    ProgressView()
-                        .tint(.white)
-                        .scaleEffect(1.2)
-                } else if !classifier.currentPrediction.isEmpty {
-                    Text(classifier.currentPrediction)
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-
-                        Text("\(Int(classifier.confidence * 100))% confianza")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white.opacity(0.9))
-                    }
-                } else if let error = classifier.errorMessage {
-                    Text(error)
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(.red.opacity(0.9))
-                        .multilineTextAlignment(.center)
+                } else if let error = foodClassifier.errorMessage {
+                    errorView(message: error)
                 }
             }
         }
-        .padding(24)
+        .frame(maxHeight: UIScreen.main.bounds.height * 0.6)
+    }
+
+    // Vista de procesamiento
+    private var processingView: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .scaleEffect(1.5)
+                .tint(.white)
+
+            Text("Analizando alimentos...")
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundColor(.white.opacity(0.9))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(32)
         .background {
             LiquidGlassCard()
         }
-        .padding(.horizontal, 20)
+    }
+
+    // Vista de resultados de alimentos
+    private func foodResultView(result: FoodAnalysisResult) -> some View {
+        VStack(spacing: 16) {
+            // Card de calorías totales
+            VStack(spacing: 12) {
+                HStack {
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 24))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.orange, .red],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
+                    Text("Total de Calorías")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.9))
+
+                    Spacer()
+                }
+
+                Text("\(result.totalCalories)")
+                    .font(.system(size: 56, weight: .bold, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.white, .white.opacity(0.8)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .scaleEffect(animateCalories ? 1.0 : 0.5)
+                    .opacity(animateCalories ? 1.0 : 0)
+                    .onAppear {
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.2)) {
+                            animateCalories = true
+                        }
+                    }
+
+                Text("kcal")
+                    .font(.system(size: 20, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.7))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(24)
+            .background {
+                LiquidGlassCard()
+            }
+
+            // Desglose de alimentos
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: "list.bullet.rectangle.fill")
+                        .foregroundColor(.white.opacity(0.9))
+
+                    Text("Desglose por Alimento")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                .padding(.horizontal, 4)
+
+                ForEach(Array(result.items.enumerated()), id: \.element.id) { index, item in
+                    FoodItemRow(item: item, index: index)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(20)
+            .background {
+                LiquidGlassCard()
+            }
+        }
+    }
+
+    // Vista cuando no es comida
+    private func notFoodView(message: String) -> some View {
+        VStack(spacing: 20) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 60))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.yellow, .orange],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .symbolEffect(.bounce, value: showResult)
+
+            Text(message)
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(32)
+        .background {
+            LiquidGlassCard()
+        }
+    }
+
+    // Vista de error
+    private func errorView(message: String) -> some View {
+        VStack(spacing: 16) {
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 50))
+                .foregroundColor(.red.opacity(0.8))
+
+            Text(message)
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundColor(.white.opacity(0.9))
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(32)
+        .background {
+            LiquidGlassCard()
+        }
     }
 
     // MARK: - Control Buttons
     private var controlButtons: some View {
         HStack(spacing: 20) {
             if showResult {
-                // Botón para nueva foto
+                // Botón para nuevo análisis
                 Button {
-                    withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                        showResult = false
-                        capturedImage = nil
-                        classifier.reset()
-                        showCamera = true
-                    }
+                    resetAnalysis()
                 } label: {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 24, weight: .semibold))
@@ -205,7 +324,7 @@ struct ContentView: View {
                             LiquidGlassButton(color: .purple)
                         }
                 }
-                .disabled(classifier.isProcessing)
+                .disabled(foodClassifier.isProcessing)
             }
 
             // Botón de captura/cámara
@@ -213,7 +332,7 @@ struct ContentView: View {
                 Button {
                     if cameraManager.isAuthorized {
                         showCamera = true
-                        captureAndClassify()
+                        captureAndAnalyze()
                     } else {
                         cameraManager.checkAuthorization()
                     }
@@ -228,7 +347,7 @@ struct ContentView: View {
                                     .frame(width: 82, height: 82)
                             }
 
-                        if classifier.isProcessing {
+                        if foodClassifier.isProcessing {
                             ProgressView()
                                 .tint(.black)
                         } else {
@@ -239,55 +358,14 @@ struct ContentView: View {
                     }
                     .shadow(color: .white.opacity(0.3), radius: 20, y: 5)
                 }
-                .disabled(classifier.isProcessing)
+                .disabled(foodClassifier.isProcessing)
             }
         }
         .padding(.horizontal, 40)
     }
 
-    // MARK: - Permission View
-    private var permissionView: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "camera.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.pink, .purple, .blue],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-
-            Text("Acceso a Cámara Necesario")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-
-            Text("Para identificar razas de perros y gatos, necesitamos acceso a tu cámara")
-                .font(.system(size: 17, weight: .medium, design: .rounded))
-                .foregroundColor(.white.opacity(0.8))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-
-            Button {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
-            } label: {
-                Text("Abrir Configuración")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 16)
-                    .background {
-                        LiquidGlassButton(color: .blue)
-                    }
-            }
-        }
-        .padding(40)
-    }
-
     // MARK: - Actions
-    private func captureAndClassify() {
+    private func captureAndAnalyze() {
         // Efecto de flash
         withAnimation(.easeOut(duration: 0.15)) {
             isFlashing = true
@@ -304,22 +382,88 @@ struct ContentView: View {
             guard let image = image else { return }
 
             capturedImage = image
+            animateCalories = false
+
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                 showResult = true
             }
 
-            // Clasificar
-            classifier.classifyImage(image)
+            // Analizar alimentos
+            foodClassifier.analyzeFood(image)
         }
     }
 
-    private func classifySelectedImage(_ image: UIImage) {
+    private func analyzeSelectedImage(_ image: UIImage) {
+        animateCalories = false
+
         withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
             showResult = true
         }
 
-        // Clasificar imagen seleccionada de la galería
-        classifier.classifyImage(image)
+        // Analizar imagen seleccionada
+        foodClassifier.analyzeFood(image)
+    }
+
+    private func resetAnalysis() {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+            showResult = false
+            capturedImage = nil
+            animateCalories = false
+            foodClassifier.reset()
+            showCamera = true
+        }
+    }
+}
+
+// MARK: - Food Item Row Component
+struct FoodItemRow: View {
+    let item: FoodItem
+    let index: Int
+
+    @State private var appeared = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // Icono de alimento
+            Image(systemName: "circle.fill")
+                .font(.system(size: 8))
+                .foregroundColor(.orange)
+
+            // Nombre del alimento
+            Text(item.name)
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundColor(.white)
+
+            Spacer()
+
+            // Calorías
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("\(item.calories) kcal")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+
+                Text(item.portionSize)
+                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                    .foregroundColor(.white.opacity(0.6))
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(.white.opacity(0.1))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .strokeBorder(.white.opacity(0.2), lineWidth: 1)
+                }
+        )
+        .offset(x: appeared ? 0 : -50)
+        .opacity(appeared ? 1 : 0)
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(Double(index) * 0.1)) {
+                appeared = true
+            }
+        }
     }
 }
 
@@ -406,10 +550,10 @@ struct AnimatedGradientBackground: View {
     var body: some View {
         LinearGradient(
             colors: [
-                Color(red: 0.3, green: 0.2, blue: 0.8),
-                Color(red: 0.8, green: 0.2, blue: 0.6),
-                Color(red: 0.2, green: 0.6, blue: 0.9),
-                Color(red: 0.5, green: 0.3, blue: 0.9)
+                Color(red: 0.9, green: 0.3, blue: 0.3),
+                Color(red: 0.9, green: 0.5, blue: 0.2),
+                Color(red: 0.8, green: 0.2, blue: 0.5),
+                Color(red: 0.7, green: 0.3, blue: 0.7)
             ],
             startPoint: animateGradient ? .topLeading : .bottomLeading,
             endPoint: animateGradient ? .bottomTrailing : .topTrailing

@@ -130,7 +130,7 @@ struct SplashView: View {
             // Transición a la app después de 2.5 segundos
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                 withAnimation(.easeOut(duration: 0.5)) {
-                    isActive = true
+                    isActive = false
                 }
             }
         }

@@ -545,6 +545,7 @@ struct ContentView: View {
     }
 
     private func analyzeSelectedImage(_ image: UIImage) {
+        capturedImage = image
         animateCalories = false
 
         withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {

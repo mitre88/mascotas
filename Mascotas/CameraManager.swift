@@ -18,6 +18,7 @@ class CameraManager: NSObject {
     var previewLayer: AVCaptureVideoPreviewLayer?
 
     private let sessionQueue = DispatchQueue(label: "com.caloriesai.camera")
+    private var photoCaptureDelegate: PhotoCaptureDelegate?
 
     override init() {
         super.init()
@@ -102,22 +103,29 @@ class CameraManager: NSObject {
     // Capturar foto
     func capturePhoto(completion: @escaping (UIImage?) -> Void) {
         guard let output = output else {
+            print("❌ Error: output es nil")
             completion(nil)
             return
         }
 
-        sessionQueue.async {
+        sessionQueue.async { [weak self] in
+            guard let self = self else { return }
+
             let settings = AVCapturePhotoSettings()
             settings.flashMode = .auto
 
-            let photoCaptureDelegate = PhotoCaptureDelegate { [weak self] image in
+            // Mantener referencia fuerte al delegado
+            self.photoCaptureDelegate = PhotoCaptureDelegate { [weak self] image in
                 DispatchQueue.main.async {
                     self?.capturedImage = image
+                    print("📸 Foto capturada: \(image != nil ? "✅" : "❌")")
                     completion(image)
+                    // Limpiar referencia después de completar
+                    self?.photoCaptureDelegate = nil
                 }
             }
 
-            output.capturePhoto(with: settings, delegate: photoCaptureDelegate)
+            output.capturePhoto(with: settings, delegate: self.photoCaptureDelegate!)
         }
     }
 }

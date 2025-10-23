@@ -89,10 +89,9 @@ struct ContentView: View {
                 }
 
                 // Overlay de interfaz
-                VStack {
+                VStack(spacing: 0) {
                     // Header
                     headerView
-                        .padding(.top, geometry.safeAreaInsets.top)
 
                     Spacer()
 
@@ -148,77 +147,46 @@ struct ContentView: View {
 
     // MARK: - Header View
     private var headerView: some View {
-        VStack(spacing: 8) {
-            HStack(alignment: .center, spacing: 12) {
-                // Ícono de llama
-                Image(systemName: "flame.fill")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.orange, .red, .pink],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .shadow(color: .orange.opacity(0.5), radius: 8)
-
-                // Título y subtítulo
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Conta Calories")
-                        .font(.system(size: 28, weight: .heavy, design: .rounded))
+        VStack(spacing: 0) {
+            // Degradado oscuro en la parte superior
+            LinearGradient(
+                colors: [
+                    Color.black.opacity(0.7),
+                    Color.black.opacity(0.4),
+                    Color.clear
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 120)
+            .ignoresSafeArea(edges: .top)
+            .overlay(alignment: .bottom) {
+                HStack(alignment: .center, spacing: 12) {
+                    // Ícono de llama
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 28, weight: .bold))
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [.white, .white.opacity(0.95)],
-                                startPoint: .top,
-                                endPoint: .bottom
+                                colors: [.orange, .red, .pink],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
                             )
                         )
-                        .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
+                        .shadow(color: .orange.opacity(0.6), radius: 10)
 
-                    Text("Analiza tus comidas con IA")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.75))
+                    // Título en una sola línea
+                    Text("Conta Calories")
+                        .font(.system(size: 26, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.5), radius: 8, y: 3)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+
+                    Spacer()
                 }
-
-                Spacer()
+                .padding(.horizontal, 24)
+                .padding(.bottom, 12)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 18)
-            .background {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        .white.opacity(0.15),
-                                        .white.opacity(0.05),
-                                        .clear
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    }
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .strokeBorder(
-                                LinearGradient(
-                                    colors: [
-                                        .white.opacity(0.5),
-                                        .white.opacity(0.2),
-                                        .clear
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1.5
-                            )
-                    }
-                    .shadow(color: .black.opacity(0.2), radius: 15, y: 8)
-            }
-            .padding(.horizontal, 16)
         }
     }
 

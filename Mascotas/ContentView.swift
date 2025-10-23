@@ -37,22 +37,52 @@ struct ContentView: View {
                             Color.black.opacity(0.3)
                                 .ignoresSafeArea()
 
-                            if !cameraManager.isAuthorized {
-                                VStack(spacing: 16) {
-                                    Image(systemName: "camera.fill")
-                                        .font(.system(size: 50))
-                                        .foregroundColor(.white.opacity(0.6))
+                            VStack(spacing: 20) {
+                                if !cameraManager.isAuthorized {
+                                    // Sin permisos
+                                    VStack(spacing: 16) {
+                                        Image(systemName: "camera.circle.fill")
+                                            .font(.system(size: 64))
+                                            .foregroundStyle(
+                                                LinearGradient(
+                                                    colors: [.orange, .red],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .shadow(color: .orange.opacity(0.5), radius: 20)
 
-                                    Text("Necesitamos acceso a la cámara")
-                                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                                        .foregroundColor(.white.opacity(0.8))
-                                        .multilineTextAlignment(.center)
+                                        VStack(spacing: 8) {
+                                            Text("Acceso a la Cámara")
+                                                .font(.system(size: 22, weight: .bold, design: .rounded))
+                                                .foregroundColor(.white)
+
+                                            Text("Necesitamos tu permiso para tomar fotos de tus alimentos")
+                                                .font(.system(size: 15, weight: .regular, design: .rounded))
+                                                .foregroundColor(.white.opacity(0.8))
+                                                .multilineTextAlignment(.center)
+                                                .padding(.horizontal, 32)
+                                        }
+                                    }
+                                    .padding(32)
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                            .fill(.ultraThinMaterial)
+                                            .shadow(color: .black.opacity(0.3), radius: 20, y: 10)
+                                    }
+                                    .padding(.horizontal, 24)
+                                } else if !cameraReady {
+                                    // Cargando cámara
+                                    VStack(spacing: 16) {
+                                        ProgressView()
+                                            .tint(.white)
+                                            .scaleEffect(1.5)
+
+                                        Text("Preparando cámara...")
+                                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
                                 }
-                                .padding()
-                            } else if !cameraReady {
-                                ProgressView()
-                                    .tint(.white)
-                                    .scaleEffect(1.5)
                             }
                         }
                     }
@@ -119,9 +149,10 @@ struct ContentView: View {
     // MARK: - Header View
     private var headerView: some View {
         VStack(spacing: 8) {
-            HStack {
-                Image(systemName: "chart.bar.doc.horizontal.fill")
-                    .font(.title2)
+            HStack(alignment: .center, spacing: 12) {
+                // Ícono de llama
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 32, weight: .bold))
                     .foregroundStyle(
                         LinearGradient(
                             colors: [.orange, .red, .pink],
@@ -129,25 +160,65 @@ struct ContentView: View {
                             endPoint: .bottomTrailing
                         )
                     )
+                    .shadow(color: .orange.opacity(0.5), radius: 8)
 
-                Text("Conta Calories")
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.white, .white.opacity(0.9)],
-                            startPoint: .top,
-                            endPoint: .bottom
+                // Título y subtítulo
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Conta Calories")
+                        .font(.system(size: 28, weight: .heavy, design: .rounded))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.white, .white.opacity(0.95)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
                         )
-                    )
+                        .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
+
+                    Text("Analiza tus comidas con IA")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(.white.opacity(0.75))
+                }
 
                 Spacer()
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 16)
-            .background {
-                LiquidGlassCard()
-            }
             .padding(.horizontal, 20)
+            .padding(.vertical, 18)
+            .background {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        .white.opacity(0.15),
+                                        .white.opacity(0.05),
+                                        .clear
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .strokeBorder(
+                                LinearGradient(
+                                    colors: [
+                                        .white.opacity(0.5),
+                                        .white.opacity(0.2),
+                                        .clear
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
+                            )
+                    }
+                    .shadow(color: .black.opacity(0.2), radius: 15, y: 8)
+            }
+            .padding(.horizontal, 16)
         }
     }
 
@@ -195,17 +266,39 @@ struct ContentView: View {
 
     // Vista de procesamiento
     private var processingView: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-                .scaleEffect(1.5)
-                .tint(.white)
+        VStack(spacing: 20) {
+            // Spinner con ícono
+            ZStack {
+                Circle()
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .red.opacity(0.3)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 3
+                    )
+                    .frame(width: 60, height: 60)
 
-            Text("Analizando alimentos...")
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                .foregroundColor(.white.opacity(0.9))
+                ProgressView()
+                    .scaleEffect(1.3)
+                    .tint(.white)
+            }
+
+            VStack(spacing: 8) {
+                Text("Analizando tu comida")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+
+                Text("Detectando alimentos y calculando calorías...")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .foregroundColor(.white.opacity(0.75))
+                    .multilineTextAlignment(.center)
+            }
         }
         .frame(maxWidth: .infinity)
-        .padding(32)
+        .padding(.vertical, 40)
+        .padding(.horizontal, 32)
         .background {
             LiquidGlassCard()
         }
@@ -287,26 +380,49 @@ struct ContentView: View {
 
     // Vista cuando no es comida
     private func notFoodView(message: String) -> some View {
-        VStack(spacing: 20) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 60))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.yellow, .orange],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+        VStack(spacing: 24) {
+            // Ícono animado
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [.yellow.opacity(0.3), .orange.opacity(0.3)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-                .symbolEffect(.bounce, value: showResult)
+                    .frame(width: 100, height: 100)
+                    .blur(radius: 10)
 
-            Text(message)
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
+                Image(systemName: "fork.knife.circle.fill")
+                    .font(.system(size: 64))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.yellow, .orange],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .symbolEffect(.bounce, value: showResult)
+                    .shadow(color: .orange.opacity(0.5), radius: 15)
+            }
+
+            VStack(spacing: 12) {
+                Text("No Detectamos Alimentos")
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+
+                Text("Intenta tomar otra foto con mejor iluminación o enfoca directamente a la comida")
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+                    .lineSpacing(4)
+            }
         }
         .frame(maxWidth: .infinity)
-        .padding(32)
+        .padding(.vertical, 40)
+        .padding(.horizontal, 32)
         .background {
             LiquidGlassCard()
         }
@@ -314,18 +430,48 @@ struct ContentView: View {
 
     // Vista de error
     private func errorView(message: String) -> some View {
-        VStack(spacing: 16) {
-            Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 50))
-                .foregroundColor(.red.opacity(0.8))
+        VStack(spacing: 20) {
+            // Ícono de error
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [.red.opacity(0.3), .pink.opacity(0.3)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 90, height: 90)
+                    .blur(radius: 10)
 
-            Text(message)
-                .font(.system(size: 16, weight: .medium, design: .rounded))
-                .foregroundColor(.white.opacity(0.9))
-                .multilineTextAlignment(.center)
+                Image(systemName: "exclamationmark.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.red, .pink],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .shadow(color: .red.opacity(0.5), radius: 15)
+            }
+
+            VStack(spacing: 8) {
+                Text("Algo Salió Mal")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+
+                Text(message)
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+                    .lineSpacing(4)
+            }
         }
         .frame(maxWidth: .infinity)
-        .padding(32)
+        .padding(.vertical, 36)
+        .padding(.horizontal, 32)
         .background {
             LiquidGlassCard()
         }
@@ -367,10 +513,10 @@ struct ContentView: View {
             // Botón de captura/cámara
             if !showResult {
                 Button {
-                    if cameraManager.isAuthorized {
+                    if cameraManager.isAuthorized && cameraReady {
                         showCamera = true
                         captureAndAnalyze()
-                    } else {
+                    } else if !cameraManager.isAuthorized {
                         cameraManager.checkAuthorization()
                     }
                 } label: {
@@ -384,7 +530,7 @@ struct ContentView: View {
                                     .frame(width: 82, height: 82)
                             }
 
-                        if foodClassifier.isProcessing {
+                        if foodClassifier.isProcessing || !cameraReady {
                             ProgressView()
                                 .tint(.black)
                         } else {
@@ -395,7 +541,7 @@ struct ContentView: View {
                     }
                     .shadow(color: .white.opacity(0.3), radius: 20, y: 5)
                 }
-                .disabled(foodClassifier.isProcessing)
+                .disabled(foodClassifier.isProcessing || !cameraReady)
             }
         }
         .padding(.horizontal, 40)

@@ -4,6 +4,12 @@
 //
 //  Created by Claude on 22/10/2025.
 //
+//  FOUNDATION MODELS:
+//  - Usa Vision Framework de Apple (Foundation Model nativo de iOS)
+//  - VNClassifyImageRequest: Modelo de clasificación de imágenes pre-entrenado
+//  - Modelos de ML integrados en el sistema operativo
+//  - Optimizado para rendimiento y privacidad en el dispositivo
+//
 
 import SwiftUI
 import Vision
@@ -18,7 +24,7 @@ class FoodClassifier {
     private let predictionQueue = DispatchQueue(label: "com.calories.prediction", qos: .userInitiated)
     private let maxResultsToAnalyze = 15 // Analizar top 15 resultados para mejor detección
 
-    // Función principal para analizar imagen
+    // Función principal para analizar imagen usando Vision Framework (Foundation Model)
     func analyzeFood(_ image: UIImage) {
         guard !isProcessing else { return }
 
@@ -37,7 +43,10 @@ class FoodClassifier {
                 return
             }
 
-            // Usar VNClassifyImageRequest nativo de Apple
+            // ⭐️ FOUNDATION MODEL: VNClassifyImageRequest
+            // Este es el modelo de clasificación nativo de Apple Vision Framework
+            // Pre-entrenado con miles de categorías de objetos, incluidos alimentos
+            // Ejecuta completamente en el dispositivo para privacidad y velocidad
             let request = VNClassifyImageRequest { [weak self] request, error in
                 guard let self = self else { return }
 

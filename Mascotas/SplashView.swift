@@ -102,7 +102,6 @@ struct SplashView: View {
                         .foregroundColor(.white.opacity(0.8))
                 }
                 .opacity(opacity)
-                .offset(y: opacity == 1 ? 0 : 20)
 
                 // Indicador de carga
                 ProgressView()

@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  CaloriesAI
+//  Conta Calories
 //
 //  Created by Claude on 22/10/2025.
 //
@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var showImagePicker = false
     @State private var showCamera = true
     @State private var animateCalories = false
+    @State private var cameraReady = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -27,16 +28,33 @@ struct ContentView: View {
 
                 // Vista de cámara cuando esté lista y no haya resultados
                 if !showResult {
-                    if showCamera && cameraManager.isAuthorized, let session = cameraManager.session {
+                    if showCamera && cameraReady && cameraManager.isAuthorized, let session = cameraManager.session {
                         CameraView(session: session)
                             .ignoresSafeArea()
-                            .onAppear {
-                                cameraManager.startSession()
-                            }
                     } else {
                         // Placeholder mientras se carga la cámara o si no hay permisos
-                        Color.black.opacity(0.3)
-                            .ignoresSafeArea()
+                        ZStack {
+                            Color.black.opacity(0.3)
+                                .ignoresSafeArea()
+
+                            if !cameraManager.isAuthorized {
+                                VStack(spacing: 16) {
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 50))
+                                        .foregroundColor(.white.opacity(0.6))
+
+                                    Text("Necesitamos acceso a la cámara")
+                                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                                        .foregroundColor(.white.opacity(0.8))
+                                        .multilineTextAlignment(.center)
+                                }
+                                .padding()
+                            } else if !cameraReady {
+                                ProgressView()
+                                    .tint(.white)
+                                    .scaleEffect(1.5)
+                            }
+                        }
                     }
                 }
 
@@ -81,8 +99,18 @@ struct ContentView: View {
             }
             .onAppear {
                 // Inicializar cámara al aparecer
-                if !cameraManager.isAuthorized {
-                    cameraManager.checkAuthorization()
+                initializeCamera()
+            }
+            .onChange(of: cameraManager.session) { _, newSession in
+                if newSession != nil && cameraManager.isAuthorized {
+                    cameraReady = true
+                    cameraManager.startSession()
+                }
+            }
+            .onChange(of: cameraManager.isAuthorized) { _, isAuth in
+                if isAuth && cameraManager.session != nil {
+                    cameraReady = true
+                    cameraManager.startSession()
                 }
             }
         }
@@ -102,8 +130,8 @@ struct ContentView: View {
                         )
                     )
 
-                Text("CaloriesAI")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                Text("Conta Calories")
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
                             colors: [.white, .white.opacity(0.9)],
@@ -425,6 +453,24 @@ struct ContentView: View {
         // Reiniciar sesión de cámara
         if cameraManager.isAuthorized {
             cameraManager.startSession()
+        }
+    }
+
+    private func initializeCamera() {
+        // Verificar y solicitar autorización
+        if !cameraManager.isAuthorized {
+            cameraManager.checkAuthorization()
+        }
+
+        // Si ya está autorizado, iniciar la cámara
+        if cameraManager.isAuthorized {
+            // Dar tiempo para que la sesión se configure
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if let _ = cameraManager.session {
+                    cameraReady = true
+                    cameraManager.startSession()
+                }
+            }
         }
     }
 }

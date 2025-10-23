@@ -17,6 +17,7 @@
 		AA0026 /* FoodItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0021 /* FoodItem.swift */; };
 		AA0027 /* FoodCaloriesDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0023 /* FoodCaloriesDatabase.swift */; };
 		AA0028 /* FoodClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0025 /* FoodClassifier.swift */; };
+		AA0029 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0022 /* SplashView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		AA0018 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0019 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		AA0021 /* FoodItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodItem.swift; sourceTree = "<group>"; };
+		AA0022 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		AA0023 /* FoodCaloriesDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodCaloriesDatabase.swift; sourceTree = "<group>"; };
 		AA0025 /* FoodClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodClassifier.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,6 +60,7 @@
 			children = (
 				AA0011 /* CaloriesAIApp.swift */,
 				AA0012 /* ContentView.swift */,
+				AA0022 /* SplashView.swift */,
 				AA0013 /* CameraManager.swift */,
 				AA0014 /* CameraView.swift */,
 				AA0019 /* ImagePicker.swift */,
@@ -159,6 +162,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA0002 /* ContentView.swift in Sources */,
+				AA0029 /* SplashView.swift in Sources */,
 				AA0003 /* CameraManager.swift in Sources */,
 				AA0004 /* CameraView.swift in Sources */,
 				AA0008 /* ImagePicker.swift in Sources */,

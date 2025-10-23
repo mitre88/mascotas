@@ -1,6 +1,6 @@
 //
 //  CameraManager.swift
-//  CaloriesAI
+//  Conta Calories
 //
 //  Created by Claude on 22/10/2025.
 //
